@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_drawer.dart';
 import 'consts.dart';
 import 'edit_page.dart';
 
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
         },
         child: const Icon(Icons.add),
       ),
+      drawer: const AppDrawer(),
     );
   }
 }
