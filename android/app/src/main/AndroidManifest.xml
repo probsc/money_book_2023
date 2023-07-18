@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="money_book_2023"
+        android:label="おこづかい帳 2023"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
