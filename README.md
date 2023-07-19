@@ -41,5 +41,5 @@
 
 ## スクリーンショット
 
-![screnshot](https://github.com/probsc/money_book_2023/assets/114720541/988f28e2-1ee1-4c53-b2b1-0616887a9ee8)
-![screnshot_dark](https://github.com/probsc/money_book_2023/assets/114720541/40d9bac9-e481-4f72-847a-4930dba861a6)
+![screnshot](https://github.com/probsc/money_book_2023/assets/114720541/fca9ee2a-942c-4cab-984e-28468e6a7049)
+![screnshot_dark](https://github.com/probsc/money_book_2023/assets/114720541/c888f39e-2cef-4771-9c0d-0a325ea1ab3d)
