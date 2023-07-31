@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'consts.dart';
-import 'graph_page.dart';
-import 'home_page.dart';
+import '../consts.dart';
+import '../views/graph_page.dart';
+import '../views/home_page.dart';
 
 /// ドロワー
 class AppDrawer extends StatelessWidget {

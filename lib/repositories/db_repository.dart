@@ -2,15 +2,16 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'records.dart';
+import '../models/records.dart';
+import 'db_repository_interface.dart';
 
 /// DB 関連クラス
-class DbHelper {
+class DbRepository implements DbRepositoryInterface {
   /// DB アクセスオブジェクト
-  static Database? __db;
+  Database? __db;
 
   /// DB アクセスオブジェクトを初期化して返す
-  static Future<Database> get _db async {
+  Future<Database> get _db async {
     if (__db == null) {
       final dir = await getApplicationDocumentsDirectory();
       final path = join(dir.path, 'money_book_2023.db');
@@ -20,10 +21,10 @@ class DbHelper {
   }
 
   /// 「レコード」テーブルの物理名
-  static const _tableRecords = 'records';
+  final _tableRecords = 'records';
 
   /// DB 初期化
-  static Future _onCreate(Database db, int version) async {
+  Future _onCreate(Database db, int version) async {
     await db.execute('''
 create table if not exists '$_tableRecords' (
   'id' integer not null,
@@ -38,7 +39,8 @@ create table if not exists '$_tableRecords' (
 ''');
   }
 
-  static Future<List<Records>> selectRecords() async {
+  @override
+  Future<List<Records>> selectRecords() async {
     return (await (await _db).rawQuery('''
 select
   *
@@ -51,7 +53,8 @@ order by
 ''')).map((n) => Records.fromMap(n)).toList();
   }
 
-  static Future<void> upsertRecord(Records record) async {
+  @override
+  Future<void> upsertRecord(Records record) async {
     await (await _db).insert(
       _tableRecords,
       record.toMap(),
@@ -59,7 +62,8 @@ order by
     );
   }
 
-  static Future<void> deleteRecord(int id) async {
+  @override
+  Future<void> deleteRecord(int id) async {
     await (await _db).delete(
       _tableRecords,
       where: 'id = ?',

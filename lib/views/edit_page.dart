@@ -2,30 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'db_helper.dart';
-import 'enums.dart';
-import 'extensions.dart';
-import 'records.dart';
+import '../enums.dart';
+import '../extensions.dart';
+import '../models/records.dart';
+import '../view_models/edit_page_view_model.dart';
+import '../view_models/home_page_view_model.dart';
 
 /// 編集ページ
-class EditPage extends StatefulWidget {
+class EditPage extends ConsumerWidget {
   /// 編集対象のレコード
   final Records? record;
 
   /// コンストラクタ
   EditPage([this.record]) : super(key: UniqueKey());
-
-  @override
-  State<EditPage> createState() => _EditPageState();
-}
-
-class _EditPageState extends State<EditPage> {
-  /// 「日付」コントローラ
-  var _txtDate = TextEditingController();
-
-  /// 「日付」の現在地
-  var _date = DateTime.now();
 
   /// 「分類」一覧
   final _categories = Categories.values
@@ -44,17 +35,8 @@ class _EditPageState extends State<EditPage> {
       )
       .toList();
 
-  /// 「分類」の現在地
-  var _category = Categories.others;
-
-  /// 「タイトル」コントローラ
-  var _txtTitle = TextEditingController();
-
   /// 「タイトル」検証用フォームキー
   final _keyTitle = GlobalKey<FormState>();
-
-  /// 「金額」コントローラ
-  var _txtPrice = TextEditingController();
 
   /// 「金額」検証用フォームキー
   final _keyPrice = GlobalKey<FormState>();
@@ -66,26 +48,9 @@ class _EditPageState extends State<EditPage> {
   final FocusNode _focusPrice = FocusNode();
 
   /// 編集モード？ (true: 編集モード / false: 登録モード)
-  bool get isEditMode => widget.record?.id != null;
+  bool get isEditMode => record?.id != null;
 
-  @override
-  void initState() {
-    super.initState();
-
-    _txtDate.text = _date.toYmd;
-
-    // 新規追加ではなく編集？ → 値を画面に反映
-    var target = widget.record;
-    if (target != null) {
-      _date = target.date;
-      _txtDate = TextEditingController(text: _date.toYmd);
-      _category = target.category;
-      _txtTitle = TextEditingController(text: target.title);
-      _txtPrice = TextEditingController(text: target.price.toString());
-    }
-  }
-
-  List<Widget>? _getActions(BuildContext context) {
+  List<Widget>? _getActions(BuildContext context, WidgetRef ref) {
     // 編集画面でなければ削除ボタンは表示しない
     if (!isEditMode) return null;
 
@@ -96,19 +61,26 @@ class _EditPageState extends State<EditPage> {
           final ret = await context.confirm('削除しますか？');
           if (ret != true) return;
 
-          DbHelper.deleteRecord(widget.record?.id ?? 0);
-          if (mounted) Navigator.pop(context);
+          // DB からレコードを削除
+          ref
+              .read(homePageViewModelProvider.notifier)
+              .deleteRecord(record?.id ?? 0);
+
+          // ignore: use_build_context_synchronously
+          Navigator.pop(context);
         },
       ),
     ];
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final viewModel = ref.watch(editPageViewModelProvider(record));
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditMode ? '編集' : '登録'),
-        actions: _getActions(context),
+        actions: _getActions(context, ref),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -125,7 +97,7 @@ class _EditPageState extends State<EditPage> {
                       children: [
                         const Text('日付'),
                         TextFormField(
-                          controller: _txtDate,
+                          controller: viewModel.dateCtrl,
                           decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.date_range),
                           ),
@@ -143,11 +115,15 @@ class _EditPageState extends State<EditPage> {
                   );
                   if (selected == null) return;
 
-                  // 呼び元の入力へ通知
-                  setState(() {
-                    _date = selected;
-                    _txtDate.text = _date.toYmd;
-                  });
+                  // 日付を更新
+                  ref
+                      .read(editPageViewModelProvider(record).notifier)
+                      .updateDate(selected);
+
+                  // 日付の表示部を更新
+                  ref
+                      .read(editPageViewModelProvider(record).notifier)
+                      .updateDateCtrl(selected.toYmd);
                 },
               ),
               const SizedBox(height: 16),
@@ -159,7 +135,7 @@ class _EditPageState extends State<EditPage> {
                   DropdownButton2(
                     isExpanded: true,
                     items: _categories,
-                    value: _category,
+                    value: viewModel.category,
                     // DropdownButton2 によるプロパティ
                     buttonStyleData: const ButtonStyleData(height: 65),
                     underline: Container(
@@ -167,14 +143,16 @@ class _EditPageState extends State<EditPage> {
                       color: Colors.grey,
                     ),
                     onChanged: (Categories? value) {
-                      setState(() {
-                        _category = value ?? Categories.others;
-                      });
+                      // 分類を更新
+                      ref
+                          .read(editPageViewModelProvider(record).notifier)
+                          .updateCategory(value ?? Categories.others);
                     },
                   )
                 ],
               ),
               const SizedBox(height: 16),
+
               // タイトル
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +161,8 @@ class _EditPageState extends State<EditPage> {
                   Form(
                     key: _keyTitle,
                     child: TextFormField(
-                      controller: _txtTitle,
+                      controller: viewModel.titleCtrl,
+                      //_txtTitle,
                       decoration: const InputDecoration(
                         hintText: '例）電車代',
                         prefixIcon: Icon(Icons.edit_outlined),
@@ -201,6 +180,7 @@ class _EditPageState extends State<EditPage> {
                 ],
               ),
               const SizedBox(height: 16),
+
               // 金額
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +189,7 @@ class _EditPageState extends State<EditPage> {
                   Form(
                     key: _keyPrice,
                     child: TextFormField(
-                      controller: _txtPrice,
+                      controller: viewModel.priceCtrl,
                       decoration: const InputDecoration(
                         hintText: '例）1000',
                         prefixIcon: Icon(Icons.paid_outlined),
@@ -240,13 +220,17 @@ class _EditPageState extends State<EditPage> {
           if (!isValid) return;
 
           // upsert
-          final record = widget.record ?? Records();
-          record.date = _date;
-          record.category = _category;
-          record.title = _txtTitle.text;
-          record.price = int.parse(_txtPrice.text);
-          record.updatedAt = DateTime.now();
-          DbHelper.upsertRecord(record);
+          final upDatedRecord = record ?? Records();
+          upDatedRecord.date = viewModel.date;
+          upDatedRecord.category = viewModel.category;
+          upDatedRecord.title = viewModel.titleCtrl.text;
+          upDatedRecord.price = int.parse(viewModel.priceCtrl.text);
+          upDatedRecord.updatedAt = DateTime.now();
+
+          // DB にレコードを追加/更新
+          ref
+              .read(homePageViewModelProvider.notifier)
+              .upsertRecord(upDatedRecord);
 
           Navigator.pop(context);
         },

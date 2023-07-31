@@ -1,5 +1,5 @@
-import 'enums.dart';
-import 'extensions.dart';
+import '../enums.dart';
+import '../extensions.dart';
 
 /// レコードクラス
 class Records {
