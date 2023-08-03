@@ -1,37 +1,19 @@
 import 'package:flutter/material.dart';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import '../enums.dart';
 
+part 'edit_page_model.freezed.dart';
+
 /// EditPage のモデルクラス
-@immutable
-class EditPageModel {
-  final DateTime date;
-  final TextEditingController dateCtrl;
-  final Categories category;
-  final TextEditingController titleCtrl;
-  final TextEditingController priceCtrl;
-
-  const EditPageModel({
-    required this.date,
-    required this.dateCtrl,
-    required this.category,
-    required this.titleCtrl,
-    required this.priceCtrl,
-  });
-
-  EditPageModel copyWith({
-    DateTime? date,
-    TextEditingController? dateCtrl,
-    Categories? category,
-    TextEditingController? titleCtrl,
-    TextEditingController? priceCtrl,
-  }) {
-    return EditPageModel(
-      date: date ?? this.date,
-      dateCtrl: dateCtrl ?? this.dateCtrl,
-      category: category ?? this.category,
-      titleCtrl: titleCtrl ?? this.titleCtrl,
-      priceCtrl: priceCtrl ?? this.priceCtrl,
-    );
-  }
+@freezed
+class EditPageModel with _$EditPageModel {
+  const factory EditPageModel({
+    required DateTime date,
+    required TextEditingController dateCtrl,
+    required Categories category,
+    required TextEditingController titleCtrl,
+    required TextEditingController priceCtrl,
+  }) = _EditPageModel;
 }

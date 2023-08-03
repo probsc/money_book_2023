@@ -1,21 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'records.dart';
 
+part 'home_page_model.freezed.dart';
+
 /// HomePage のモデルクラス
-@immutable
-class HomePageModel {
-  final List<Records> records;
-
-  const HomePageModel({
-    required this.records,
-  });
-
-  HomePageModel copyWith({
-    List<Records>? records,
-  }) {
-    return HomePageModel(
-      records: records ?? this.records,
-    );
-  }
+@freezed
+class HomePageModel with _$HomePageModel {
+  const factory HomePageModel({
+    required List<Records> records,
+  }) = _HomePageModel;
 }
