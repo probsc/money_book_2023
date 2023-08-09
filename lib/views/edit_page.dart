@@ -75,8 +75,6 @@ class EditPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final viewModel = ref.watch(editPageViewModelProvider(record));
-
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditMode ? '編集' : '登録'),
@@ -97,7 +95,7 @@ class EditPage extends ConsumerWidget {
                       children: [
                         const Text('日付'),
                         TextFormField(
-                          controller: viewModel.dateCtrl,
+                          controller: ref.watch(editPageVMDataCtrlProvider),
                           decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.date_range),
                           ),
@@ -116,13 +114,11 @@ class EditPage extends ConsumerWidget {
                   if (selected == null) return;
 
                   // 日付を更新
-                  ref
-                      .read(editPageViewModelProvider(record).notifier)
-                      .updateDate(selected);
+                  ref.read(editPageVMProvider.notifier).updateDate(selected);
 
                   // 日付の表示部を更新
                   ref
-                      .read(editPageViewModelProvider(record).notifier)
+                      .read(editPageVMProvider.notifier)
                       .updateDateCtrl(selected.toYmd);
                 },
               ),
@@ -135,7 +131,7 @@ class EditPage extends ConsumerWidget {
                   DropdownButton2(
                     isExpanded: true,
                     items: _categories,
-                    value: viewModel.category,
+                    value: ref.watch(editPageVMCategoryProvider),
                     // DropdownButton2 によるプロパティ
                     buttonStyleData: const ButtonStyleData(height: 65),
                     underline: Container(
@@ -145,7 +141,7 @@ class EditPage extends ConsumerWidget {
                     onChanged: (Categories? value) {
                       // 分類を更新
                       ref
-                          .read(editPageViewModelProvider(record).notifier)
+                          .read(editPageVMProvider.notifier)
                           .updateCategory(value ?? Categories.others);
                     },
                   )
@@ -161,8 +157,7 @@ class EditPage extends ConsumerWidget {
                   Form(
                     key: _keyTitle,
                     child: TextFormField(
-                      controller: viewModel.titleCtrl,
-                      //_txtTitle,
+                      controller: ref.watch(editPageVMTitleCtrlProvider),
                       decoration: const InputDecoration(
                         hintText: '例）電車代',
                         prefixIcon: Icon(Icons.edit_outlined),
@@ -189,7 +184,7 @@ class EditPage extends ConsumerWidget {
                   Form(
                     key: _keyPrice,
                     child: TextFormField(
-                      controller: viewModel.priceCtrl,
+                      controller: ref.watch(editPageVMPriceCtrlProvider),
                       decoration: const InputDecoration(
                         hintText: '例）1000',
                         prefixIcon: Icon(Icons.paid_outlined),
@@ -219,12 +214,14 @@ class EditPage extends ConsumerWidget {
           isValid &= _keyPrice.currentState?.validate() ?? false;
           if (!isValid) return;
 
+          final vm = ref.watch(editPageVMProvider);
+
           // upsert
           final upDatedRecord = record ?? Records();
-          upDatedRecord.date = viewModel.date;
-          upDatedRecord.category = viewModel.category;
-          upDatedRecord.title = viewModel.titleCtrl.text;
-          upDatedRecord.price = int.parse(viewModel.priceCtrl.text);
+          upDatedRecord.date = vm.date;
+          upDatedRecord.category = vm.category;
+          upDatedRecord.title = vm.titleCtrl.text;
+          upDatedRecord.price = int.parse(vm.priceCtrl.text);
           upDatedRecord.updatedAt = DateTime.now();
 
           // DB にレコードを追加/更新

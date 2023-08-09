@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../consts.dart';
+import '../view_models/edit_page_view_model.dart';
 import '../view_models/home_page_view_model.dart';
 import '../widgets/app_drawer.dart';
 import 'edit_page.dart';
@@ -27,11 +28,17 @@ class HomePage extends ConsumerWidget {
                     subtitle: Text(data.records[index].toString()),
                     onTap: () async {
                       // 編集画面に遷移
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => EditPage(data.records[index])),
-                      );
+                      await Navigator.push(context, MaterialPageRoute(
+                        builder: (_) {
+                          return ProviderScope(
+                            overrides: [
+                              editPageVMProvider.overrideWith((ref) =>
+                                  EditPageViewModel(data.records[index])),
+                            ],
+                            child: EditPage(data.records[index]),
+                          );
+                        },
+                      ));
                     },
                   );
                 },
