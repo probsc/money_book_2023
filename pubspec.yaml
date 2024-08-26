@@ -14,20 +14,20 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  cupertino_icons: ^1.0.5
-  package_info_plus: ^4.0.2
-  intl: ^0.18.0
-  sqflite: ^2.2.8+4
-  path: ^1.8.3
-  path_provider: ^2.0.15
-  dropdown_button2: ^2.3.4
-  google_fonts: ^5.1.0
+  cupertino_icons: ^1.0.8
+  package_info_plus: ^8.0.2
+  intl: ^0.19.0
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  dropdown_button2: ^2.3.9
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^2.0.2
+  flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.13.1
 
 flutter:
